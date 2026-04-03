@@ -20,7 +20,7 @@ class IoTDevices:
     alpha = 1
     beta = 10
     @staticmethod
-    def partial_sample_length(self):
+    def partial_sample_length():
         return BetaDist.rvs(1, 10)
 
     @staticmethod
@@ -28,7 +28,7 @@ class IoTDevices:
         return BetaDist.rvs(2,5)
 
     @staticmethod
-    def prob_pass_audit(self, fog_node):
+    def prob_pass_audit(fog_node):
         ell = IoTDevices.partial_sample_length()
         h = fog_node.honesty
         if ell > h:
@@ -38,6 +38,12 @@ class IoTDevices:
         else: # 0 < ell <= h < 1
             eta = (h-ell)**2/(h*(1-ell))
             return eta
+
+    @staticmethod
+    def payment(fog_node):
+        norm_r = (fog_node.reputation - IIMSC.rep_min)/(IIMSC.rep_max - IIMSC.rep_min)
+        payment = IoTDevices.cost + IoTDevices.gamma * norm_r
+        return payment
 
 
 

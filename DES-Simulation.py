@@ -28,7 +28,13 @@ for s in range(num_strategies):
 # for f in fog_nodes:
 #     fog_dict[f.fog_id] = f
 
-# State variables
+###### State variables ######
+
+# Reputation over time
+rep_state = []
+
+# Payment - Cost over time
+payment_state = []
 
 
 # Simpy Processes
@@ -50,9 +56,13 @@ def audit_selection_iot(env):
         audit_observation(env, fn, False)
 
 def audit_observation(env, fog_node, oracle=True):
+    passed_audit = True
+
+    # Audit
     if oracle:
         if fog_node.honest < 1:
             print(f"Fog node {fog_node.fog_id} failed Oracle audit at {env.now}")
+            passed_audit = False
             reputation_update(env, fog_node, False)
         else:
             print(f"Fog node {fog_node.fog_id} passed Oracle audit at {env.now}")
@@ -61,11 +71,16 @@ def audit_observation(env, fog_node, oracle=True):
         eta = IoT.prob_pass_audit(fog_node)
         if random.random() > eta: # failure
             print(f"Fog node {fog_node.fog_id} failed IoT partial verification at {env.now}")
+            passed_audit = False
             reputation_update(env, fog_node, False)
         else:
             print(f"Fog node {fog_node.fog_id} passed IoT partial verification at {env.now}")
             reputation_update(env, fog_node, True)
 
+    # Service Payment
+    fog_node.payment -= fog_node.honesty * IoT.cost
+    if passed_audit:
+        fog_node.payment += IoT.payment(fog_node)
 
 def reputation_update(env, fog_node, success=True):
     if success:
@@ -79,14 +94,21 @@ def reputation_update(env, fog_node, success=True):
             fog_node.active = False
         else:
             print(f"Fog node {fog_node.fog_id} has {fog_node.reputation} reputation and {fog_node.deposit} deposit remaining at {env.now}")
-
+    reputation_state_update(env)
     honesty_update(env, fog_node)
 
 def honesty_update(env, fog_node):
     print(f"Fog node {fog_node.fog_id} updating honesty at {env.now}")
     fog_node.update_honesty()
 
-
+def reputation_state_update(env):
+    print(f"Updating reputation state at {env.now}")
+    strate_dict = dict()
+    for i in range(num_strategies):
+        strat_fog_reps = [f.reputation for f in fog_nodes if f.active and f.stategy == FC.Strategy(s)]
+        strat_fog_payments = [(f.payment - IIMSC.deposit + f.deposit) for f in fog_nodes
+                              if f.active and f.stategy == FC.Strategy(s)]
+    strate_dict[FC.Strategy(s).name] = {'R': strat_fog_reps, 'P': strat_fog_payments}
 
 
 ######### Simpy #########
