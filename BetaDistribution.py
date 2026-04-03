@@ -44,7 +44,10 @@ def rep_threshold():
     return BetaDist.rvs(alpha, beta)
 
 def beta_sample(alpha, beta):
-    return BetaDist.rvs(alpha, beta)
+    try:
+        return BetaDist.rvs(alpha, beta)
+    except:
+        print("Parameters are negative")
 
 def plot_beta():
     ab_mid = int((ab_min + ab_max)/2)

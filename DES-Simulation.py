@@ -1,4 +1,5 @@
 import random
+random.seed = 100
 
 import simpy
 
@@ -17,7 +18,7 @@ IoT_AR = 100
 ####### Setup #######
 
 # f fog nodes per strategy (5)
-fog_per = 200
+fog_per = 1000
 num_strategies = 5
 fog_nodes = [None]*(fog_per * num_strategies)
 for s in range(num_strategies):
@@ -36,7 +37,7 @@ rep_state = []
 # Payment - Cost over time
 payment_state = []
 # Store states in csv file
-fieldnames = ['Time', 'strategy', 'avg_reputation', 'rep_count', 'avg_profit', 'prof_count']
+fieldnames = ['Time', 'strategy', 'fog_count', 'avg_reputation', 'avg_profit']
 csvfile_name = "fisie_state_data.csv"
 with open(csvfile_name, 'w', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -71,27 +72,25 @@ def audit_observation(env, fog_node, oracle=True):
         if fog_node.honesty < 1:
             print(f"Fog node {fog_node.fog_id} failed Oracle audit at {env.now}")
             passed_audit = False
-            reputation_update(env, fog_node, False)
         else:
             print(f"Fog node {fog_node.fog_id} passed Oracle audit at {env.now}")
-            reputation_update(env, fog_node, True)
+            #passed_audit = True
     else: # IoT
         eta = IoT.prob_pass_audit(fog_node)
         if random.random() > eta: # failure
             print(f"Fog node {fog_node.fog_id} failed IoT partial verification at {env.now}")
             passed_audit = False
-            reputation_update(env, fog_node, False)
         else:
             print(f"Fog node {fog_node.fog_id} passed IoT partial verification at {env.now}")
-            reputation_update(env, fog_node, True)
+            #passed_audit = True
+    service_payment(env, fog_node, passed_audit)
+    reputation_update(env, fog_node, passed_audit)
 
-    # Service Payment
-    fog_node.profit -= fog_node.honesty * IoT.cost
+
+
+def reputation_update(env, fog_node, passed_audit=True):
+    ejected = False
     if passed_audit:
-        fog_node.profit += IoT.payment(fog_node)
-
-def reputation_update(env, fog_node, success=True):
-    if success:
         fog_node.reputation = min([fog_node.reputation + IIMSC.rep_inc, IIMSC.rep_max])
         print(f"Fog node {fog_node.fog_id} reputation increased to {fog_node.reputation} at {env.now}")
     else:
@@ -100,10 +99,12 @@ def reputation_update(env, fog_node, success=True):
         if fog_node.deposit <= 0 or fog_node.reputation < IIMSC.rep_min:
             print(f"Fog node {fog_node.fog_id} is ejected from the system at {env.now}")
             fog_node.active = False
+            ejected = True
         else:
             print(f"Fog node {fog_node.fog_id} has {fog_node.reputation} reputation and {fog_node.deposit} deposit remaining at {env.now}")
     state_update(env, fog_node)
-    honesty_update(env, fog_node)
+    if not ejected:
+        honesty_update(env, fog_node)
 
 def honesty_update(env, fog_node):
     print(f"Fog node {fog_node.fog_id} updating honesty at {env.now}")
@@ -116,14 +117,20 @@ def state_update(env, fog_node):
     strat_fog_reps = [f.reputation for f in fog_nodes if f.active and f.strategy == fn_strategy]
     strat_fog_profits = [(f.profit - IIMSC.deposit + f.deposit) for f in fog_nodes
                                      if f.active and f.strategy == fn_strategy]
-    strat_rep_avg, strat_rep_count = np.mean(strat_fog_reps), len(strat_fog_reps)
-    strat_profit_avg, strat_profit_count = np.mean(strat_fog_profits), len(strat_fog_profits)
+    strat_rep_avg, strat_count = np.mean(strat_fog_reps), len(strat_fog_reps)
+    strat_profit_avg = np.mean(strat_fog_profits)
     # Append to csv
     ## ['Time', 'strategy', 'avg_reputation', 'rep_count', 'avg_profit', 'prof_count']
-    new_row = [env.now, fn_strategy.name, strat_rep_avg, strat_rep_count, strat_profit_avg, strat_profit_count]
+    new_row = [env.now, fn_strategy.name, strat_count, strat_rep_avg, strat_profit_avg]
     with open(csvfile_name, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(new_row)
+
+def service_payment(env, fog_node, passed_audit=True):
+    # Service Payment
+    fog_node.profit -= fog_node.honesty * IoT.cost
+    if passed_audit:
+        fog_node.profit += IoT.payment(fog_node)
 
 def verify_continue(env):
     active_count = len([f for f in fog_nodes if f.active])
@@ -134,6 +141,6 @@ def verify_continue(env):
 env = simpy.Environment()
 env.process(audit_selection_oracle(env))
 env.process(audit_selection_iot(env))
-env.run(until=1)
+env.run(until=1000)
 
 # System end when no fog node remain active
