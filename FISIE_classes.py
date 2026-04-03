@@ -56,7 +56,7 @@ class FogNode:
         self.threshold = 0
         self.strategy = strat
         self.deposit = IIMSC.deposit
-        self.payment = 0 # Accumulated payments
+        self.profit = 0 # Accumulated payments
         self.active = True
         if self.strategy is Strategy.Cyclic:
             self.threshold = 0.6 + 0.3 * random()

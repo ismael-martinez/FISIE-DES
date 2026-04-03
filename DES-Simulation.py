@@ -8,6 +8,7 @@ from FISIE_classes import IIMSC
 import BetaDistribution as BD
 import AuditSelection as AS
 import numpy as np
+import csv
 
 # Arrival Rates
 oracle_AR = 1
@@ -32,9 +33,14 @@ for s in range(num_strategies):
 
 # Reputation over time
 rep_state = []
-
 # Payment - Cost over time
 payment_state = []
+# Store states in csv file
+fieldnames = ['Time', 'strategy', 'avg_reputation', 'rep_count', 'avg_profit', 'prof_count']
+csvfile_name = "fisie_state_data.csv"
+with open(csvfile_name, 'w') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    writer.writeheader()
 
 
 # Simpy Processes
@@ -78,7 +84,7 @@ def audit_observation(env, fog_node, oracle=True):
             reputation_update(env, fog_node, True)
 
     # Service Payment
-    fog_node.payment -= fog_node.honesty * IoT.cost
+    fog_node.profit -= fog_node.honesty * IoT.cost
     if passed_audit:
         fog_node.payment += IoT.payment(fog_node)
 
@@ -103,12 +109,19 @@ def honesty_update(env, fog_node):
 
 def reputation_state_update(env):
     print(f"Updating reputation state at {env.now}")
-    strate_dict = dict()
+    strat_dict = dict()
     for i in range(num_strategies):
         strat_fog_reps = [f.reputation for f in fog_nodes if f.active and f.stategy == FC.Strategy(s)]
-        strat_fog_payments = [(f.payment - IIMSC.deposit + f.deposit) for f in fog_nodes
-                              if f.active and f.stategy == FC.Strategy(s)]
-    strate_dict[FC.Strategy(s).name] = {'R': strat_fog_reps, 'P': strat_fog_payments}
+        strat_fog_profits = [(f.profit - IIMSC.deposit + f.deposit) for f in fog_nodes
+                                         if f.active and f.stategy == FC.Strategy(s)]
+        strat_rep_avg, strat_rep_count = np.mean(strat_fog_reps), len(strat_fog_reps)
+        strat_profit_avg, strat_profit_count = np.mean(strat_fog_profits), len(strat_fog_profits)
+        # Append to csv
+        ## ['Time', 'strategy', 'avg_reputation', 'rep_count', 'avg_profit', 'prof_count']
+        new_row = [env.now, FC.Strategy(i).name, strat_rep_avg, strat_rep_count, strat_profit_avg, strat_profit_count]
+        with open(csvfile_name, 'a') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(new_row)
 
 
 ######### Simpy #########
