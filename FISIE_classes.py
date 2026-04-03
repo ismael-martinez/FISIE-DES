@@ -73,7 +73,7 @@ class FogNode:
                 self.honesty = BD.balanced_strat()
             case Strategy.Cyclic:
                 self.honesty = BD.cyclic_strat(self.reputation, self.threshold)
-            case Strategy.Aggressive:
+            case Strategy.Opportunistic:
                 self.honesty = BD.opportunistic_strat(self.reputation)
             case _:
                 print("Not a valid strategy")
