@@ -53,8 +53,9 @@ def plot_beta():
     ab_mid = int((ab_min + ab_max)/2)
     ab_array = [(ab_min, ab_max), (ab_mid, ab_mid), (ab_max, ab_min)]
     dashes = ['--', '-', '-.']
-    colours = ['#F54A00', '#5CF000', '#9400F0']
-
+    # colours = ['#F54A00', '#5CF000', '#9400F0']
+    # Reddish-Orange, Green, Pinkish-Purple
+    colours = ['#F54A00', '#009E73', '#AA00AA']
 
     plt.subplots(figsize=(6.3,3.5))
     for i, ab in enumerate(ab_array):
@@ -73,3 +74,5 @@ def plot_beta():
     plt.ylabel(r'Probability Density', fontsize=10)
     plt.tight_layout()
     plt.show()
+
+# plot_beta()
