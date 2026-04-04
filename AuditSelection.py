@@ -15,7 +15,7 @@ def audit_selection(fog_nodes, oracle=True): #if false, IoT
     sum_rep = sum([math.exp(-f.reputation) for f in active_nodes])
     # Build distribution
     selection_dist = [0.0]*len(active_nodes)
-    selection_dist[0] = (math.exp(-active_nodes[0].reputation))/sum_rep
+    selection_dist[0] = math.exp(-active_nodes[0].reputation)/sum_rep
     for i in range(1, len(active_nodes)):
         selection_dist[i] = (math.exp(-active_nodes[0].reputation))/sum_rep + selection_dist[i-1]
     selection_dist[-1] = 1 # remove any round-off errors
