@@ -129,7 +129,7 @@ def verify_continue(env):
         return False# Stop, all nodes ejected
     return True
 
-for sim in range(10):
+for sim in range(10, 50):
     print(f"Simulation {sim}")
     random.seed = seed_base + sim
 
