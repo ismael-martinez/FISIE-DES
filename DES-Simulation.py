@@ -129,7 +129,7 @@ def verify_continue(env):
         return False# Stop, all nodes ejected
     return True
 
-for sim in range(10, 50):
+for sim in range(0, 50):
     print(f"Simulation {sim}")
     random.seed = seed_base + sim
 
@@ -152,11 +152,15 @@ for sim in range(10, 50):
     payment_state = []
     # Store states in csv file
     fieldnames = ['Time', 'strategy', 'fog_count', 'avg_reputation', 'avg_profit']
+
     csvfile_name = "fisie_state_data_{}.csv".format(sim)
     with open(csvfile_name, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-
+        writer = csv.writer(csvfile)
+        for s in range(num_strategies):
+            first_row = [0, FC.Strategy(s).name, fog_per, IIMSC.rep_init, 0]
+            writer.writerow(first_row)
 
     ######### Simpy #########
     env = simpy.Environment()

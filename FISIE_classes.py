@@ -7,6 +7,7 @@ from random import random
 class IIMSC:
     rep_min = 2  # R_min
     rep_max = 10  # R_max
+    rep_init = 7 # R_init
     rep_inc = 1  # r^+
     rep_dec = 3  # r^-
     deposit_dec = 1  # d^-
@@ -51,7 +52,7 @@ class FogNode:
     fog_id = 0
     def __init__(self, strat):
         self.fog_id = FogNode.fog_id
-        self.reputation = 7
+        self.reputation = IIMSC.rep_init
         self.honesty = 0
         self.threshold = 0
         self.strategy = strat
