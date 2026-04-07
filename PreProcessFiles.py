@@ -41,43 +41,51 @@ class FisieDataFrames(object):
 
 def create_new_df(time_col, strategy, val_col, num_files):
 
-    # Read DataFrames
-    value = "avg_reputation"
-    time = "Time"
-    num_files = 5
-    DF = FisieDataFrames(base_file, strategy, time, value, num_files)
+    # Read DataFra
+    DF = FisieDataFrames(base_file, strategy, time_col, val_col, num_files)
 
     # Build new DataFrame
     n_idx = 0
     merged_df = pd.DataFrame({time_col: [], "strategy":[], val_col: []})
 
-    # Find maximum timestamp from tail_df
-    max_t = DF.tail_df[time_col].max()
-    # Mean value
-    avg_val = DF.tail_df[val_col].mean()
-    # Append to new df
-    new_row = [max_t, strategy, avg_val]
-    merged_df[n_idx] = new_row
-    n_idx += 1
+    while True:
+        # Find maximum timestamp from tail_df
+        max_t = DF.tail_df[time_col].max()
+        # Mean value
+        avg_val = DF.tail_df[val_col].mean()
+        # Append to new df
+        new_row = [max_t, strategy, avg_val]
+        merged_df.loc[n_idx] = new_row
+        n_idx += 1
 
-    # adjust tail_df
-    max_t_tail_rows = DF.tail_df[DF.tail_df[DF.time_col] == max_t]
-    for t_idx, row in max_t_tail_rows.iterrows():
-        prev_id = row['idx'] - 1
-        data_row = DF.dataframes[t_idx].loc[prev_id]
-        id_row = pd.Series({"idx":prev_id})
-        full_row = pd.concat([data_row, id_row])
-        DF.tail_df.loc[t_idx] = full_row
+        # adjust tail_df
+        if max_t > 0:
+            max_t_tail_rows = DF.tail_df[DF.tail_df[DF.time_col] == max_t]
+            for t_idx, row in max_t_tail_rows.iterrows():
+                prev_id = row['idx'] - 1
+                data_row = DF.dataframes[t_idx].loc[prev_id]
+                id_row = pd.Series({"idx":prev_id})
+                full_row = pd.concat([data_row, id_row])
+                DF.tail_df.loc[t_idx] = full_row
+        else:
+            merged_df = merged_df.sort_values(by=time_col).reset_index(drop=True)
+            print(merged_df.head())
+            return merged_df
 
-    print(DF.tail_df.head())
+
 
 
 # Read DataFrames
-value = "avg_reputation"
-time = "Time"
-num_files = 5
-strategy = "Aggressive"
-create_new_df(time, strategy, value, num_files)
-
+values = ["avg_reputation", "avg_profit", "fog_count"]
+time_col = "Time"
+num_files = 50
+for v in values:
+    val_df = pd.DataFrame({time_col:[], "strategy": [], v:[]})
+    for s in FC.Strategy:
+        s_df = create_new_df(time_col, s.name, v, num_files)
+        val_df = pd.concat([val_df, s_df])
+    filename = f"fisie_merged_{v}.csv"
+    val_df = val_df.sort_values(by=time_col).reset_index(drop=True)
+    val_df.to_csv(filename, index=False)
 
 
