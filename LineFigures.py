@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-csvfile_name = "fisie_state_data_1.csv"
+csvfile_name = "fisie_state_data_0.csv"
 df = pd.read_csv(csvfile_name)
 
 # Plot Parameters
@@ -24,6 +24,9 @@ plt.title("Reputation over Time by Strategy")
 plt.tight_layout()
 plt.show()
 
+# csvfile_name = "fisie_merged_avg_profit.csv"
+# df = pd.read_csv(csvfile_name)
+
 plt.figure(figsize=(8, 4.6))
 for i, s in enumerate(strats):
     df_strat = df[df['strategy']==s]
@@ -36,6 +39,10 @@ plt.legend(title="Legend — Strategies", title_fontproperties={'weight': 'bold'
 plt.title("Profit over Time by Strategy")
 plt.tight_layout()
 plt.show()
+
+
+# csvfile_name = "fisie_merged_fog_count.csv"
+# df = pd.read_csv(csvfile_name)
 
 plt.figure(figsize=(8, 4.6))
 for i, s in enumerate(strats):

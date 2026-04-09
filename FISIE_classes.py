@@ -37,7 +37,7 @@ class IoTDevices:
         elif ell == 0 or h == 1:
             return 1
         else: # 0 < ell <= h < 1
-            eta = (h-ell)**2/(h*(1-ell))
+            eta = (h-ell)/(1-ell)
             return eta
 
     @staticmethod

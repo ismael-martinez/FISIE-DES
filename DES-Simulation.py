@@ -12,9 +12,12 @@ import numpy as np
 import csv
 
 # Arrival Rates
-oracle_AR = 1
+oracle_AR = 20
 IoT_AR = 100
+oracle_iot_fraction =  oracle_AR/IoT_AR
 VERBOSE = False
+suffix = f"ar_{oracle_iot_fraction}_"
+suffix = suffix.replace('.','-')
 
 # Simpy Processes
 def audit_selection_oracle(env):
@@ -104,15 +107,19 @@ def state_update(env, fog_node):
     strat_fog_reps = [f.reputation for f in fog_nodes if f.active and f.strategy == fn_strategy]
     strat_fog_profits = [(f.profit - IIMSC.deposit + f.deposit) for f in fog_nodes
                                      if f.active and f.strategy == fn_strategy]
+    strat_fog_honesty = [f.honesty for f in fog_nodes if f.active and f.strategy == fn_strategy]
     strat_rep_avg, fog_count = np.nan, 0
     if len(strat_fog_reps) > 0:
         strat_rep_avg, fog_count = np.mean(strat_fog_reps), len(strat_fog_reps)
     strat_profit_avg = np.nan
     if len(strat_fog_profits) > 0:
         strat_profit_avg = np.mean(strat_fog_profits)
+    strat_honesty_avg = np.nan
+    if len(strat_fog_honesty) > 0:
+        strat_honesty_avg = np.mean(strat_fog_honesty)
     # Append to csv
-    ## ['Time', 'strategy', 'avg_reputation', 'rep_count', 'avg_profit', 'prof_count']
-    new_row = [env.now, fn_strategy.name, fog_count, strat_rep_avg, strat_profit_avg]
+    ## ['Time', 'strategy', 'avg_reputation', 'rep_count', 'avg_profit', 'prof_count', 'avg_honesty']
+    new_row = [env.now, fn_strategy.name, fog_count, strat_rep_avg, strat_profit_avg, strat_honesty_avg]
     with open(csvfile_name, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(new_row)
@@ -128,6 +135,9 @@ def verify_continue(env):
     if active_count <= 0:
         return False# Stop, all nodes ejected
     return True
+
+
+
 
 for sim in range(0, 50):
     print(f"Simulation {sim}")
@@ -151,15 +161,15 @@ for sim in range(0, 50):
     # Payment - Cost over time
     payment_state = []
     # Store states in csv file
-    fieldnames = ['Time', 'strategy', 'fog_count', 'avg_reputation', 'avg_profit']
+    fieldnames = ['Time', 'strategy', 'fog_count', 'avg_reputation', 'avg_profit', 'avg_honesty']
 
-    csvfile_name = "fisie_state_data_{}.csv".format(sim)
+    csvfile_name = "fisie_state_data_{}{}.csv".format(suffix, sim)
     with open(csvfile_name, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         writer = csv.writer(csvfile)
         for s in range(num_strategies):
-            first_row = [0, FC.Strategy(s).name, fog_per, IIMSC.rep_init, 0]
+            first_row = [0, FC.Strategy(s).name, fog_per, IIMSC.rep_init, 0, np.nan]
             writer.writerow(first_row)
 
     ######### Simpy #########

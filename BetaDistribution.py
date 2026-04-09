@@ -38,7 +38,7 @@ def partial_length():
     beta = 10
     return BetaDist.rvs(alpha, beta)
 
-def rep_threshold():
+def rep_iot_threshold():
     alpha = 2
     beta = 5
     return BetaDist.rvs(alpha, beta)

@@ -34,7 +34,7 @@ class FisieDataFrames(object):
             new_row_tail = [lr_idx, self.strategy, last_row[self.time_col], last_row[self.val_col]]
             self.tail_df.loc[sim_idx] = new_row_tail
 
-        print(self.tail_df.head())
+        #print(self.tail_df.head())
 
 
 
