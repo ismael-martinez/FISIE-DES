@@ -12,12 +12,13 @@ import numpy as np
 import csv
 
 # Arrival Rates
-oracle_AR = 20
+oracle_AR = 5
 IoT_AR = 100
 oracle_iot_fraction =  oracle_AR/IoT_AR
 VERBOSE = False
 suffix = f"ar_{oracle_iot_fraction}_"
 suffix = suffix.replace('.','-')
+
 
 # Simpy Processes
 def audit_selection_oracle(env):
@@ -68,12 +69,15 @@ def audit_observation(env, fog_node, oracle=True):
             if VERBOSE:
                 print(f"Fog node {fog_node.fog_id} passed IoT partial verification at {env.now}")
             #passed_audit = True
-    service_payment(env, fog_node, passed_audit)
-    reputation_update(env, fog_node, passed_audit)
+    audit = FC.Audit(fog_node, oracle, passed_audit)
+    service_payment(env, audit)
+    reputation_update(env, audit)
 
 
 
-def reputation_update(env, fog_node, passed_audit=True):
+def reputation_update(env, audit):
+    fog_node = audit.fog_node
+    passed_audit = audit.audit_pass
     ejected = False
     if passed_audit:
         fog_node.reputation = min([fog_node.reputation + IIMSC.rep_inc, IIMSC.rep_max])
@@ -90,16 +94,18 @@ def reputation_update(env, fog_node, passed_audit=True):
         else:
             if VERBOSE:
                 print(f"Fog node {fog_node.fog_id} has {fog_node.reputation} reputation and {fog_node.deposit} deposit remaining at {env.now}")
-    state_update(env, fog_node)
+    state_update(env, audit)
     if not ejected:
-        honesty_update(env, fog_node)
+        honesty_update(env, audit)
 
-def honesty_update(env, fog_node):
+def honesty_update(env, audit):
+    fog_node = audit.fog_node
     if VERBOSE:
         print(f"Fog node {fog_node.fog_id} updating honesty at {env.now}")
     fog_node.update_honesty()
 
-def state_update(env, fog_node):
+def state_update(env, audit):
+    fog_node = audit.fog_node
     fn_strategy = fog_node.strategy
     if VERBOSE:
         print(f"Updating state at {env.now} for {fn_strategy.name} strategy")
@@ -119,12 +125,14 @@ def state_update(env, fog_node):
         strat_honesty_avg = np.mean(strat_fog_honesty)
     # Append to csv
     ## ['Time', 'strategy', 'avg_reputation', 'rep_count', 'avg_profit', 'prof_count', 'avg_honesty']
-    new_row = [env.now, fn_strategy.name, fog_count, strat_rep_avg, strat_profit_avg, strat_honesty_avg]
+    new_row = [env.now, fn_strategy.name, fog_count, strat_rep_avg, strat_profit_avg, strat_honesty_avg, audit.type, audit.audit_pass]
     with open(csvfile_name, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(new_row)
 
-def service_payment(env, fog_node, passed_audit=True):
+def service_payment(env, audit):
+    fog_node = audit.fog_node
+    passed_audit = audit.audit_pass
     # Service Payment
     fog_node.profit -= fog_node.honesty * IoT.cost
     if passed_audit:
@@ -161,7 +169,7 @@ for sim in range(0, 50):
     # Payment - Cost over time
     payment_state = []
     # Store states in csv file
-    fieldnames = ['Time', 'strategy', 'fog_count', 'avg_reputation', 'avg_profit', 'avg_honesty']
+    fieldnames = ['Time', 'strategy', 'fog_count', 'avg_reputation', 'avg_profit', 'avg_honesty', 'audit_type', 'audit_result']
 
     csvfile_name = "fisie_state_data_{}{}.csv".format(suffix, sim)
     with open(csvfile_name, 'w', newline='') as csvfile:

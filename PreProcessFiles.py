@@ -1,8 +1,14 @@
 import pandas as pd
 import numpy as np
 import FISIE_classes as FC
+import math
 
+STEP = 0.05
+t_idx_mrg = 0 # will set later
+
+suffix = "ar_0-05_"
 base_file = "fisie_state_data_"
+
 
 class FisieDataFrames(object):
     def __init__(self, base_file_name, strategy, time_col, val_col, num_files):
@@ -41,32 +47,42 @@ class FisieDataFrames(object):
 
 def create_new_df(time_col, strategy, val_col, num_files):
 
-    # Read DataFra
-    DF = FisieDataFrames(base_file, strategy, time_col, val_col, num_files)
+    # Read DataFrame
+    file = f"{base_file}{suffix}"
+    DF = FisieDataFrames(file, strategy, time_col, val_col, num_files)
 
     # Build new DataFrame
     n_idx = 0
     merged_df = pd.DataFrame({time_col: [], "strategy":[], val_col: []})
 
+    # Find maximum timestamp from tail_df - becomes starting point for merged_df
+    t_idx_mrg = DF.tail_df[time_col].max()
+    t_idx_mrg = math.ceil(t_idx_mrg*20)/20 # Round up to nearest 0.05
+
     while True:
-        # Find maximum timestamp from tail_df
-        max_t = DF.tail_df[time_col].max()
         # Mean value
         avg_val = DF.tail_df[val_col].mean()
         # Append to new df
-        new_row = [max_t, strategy, avg_val]
+        new_row = [t_idx_mrg, strategy, avg_val]
         merged_df.loc[n_idx] = new_row
         n_idx += 1
+        t_idx_mrg -= STEP
+        t_idx_mrg = round(t_idx_mrg, 2)
 
         # adjust tail_df
-        if max_t > 0:
-            max_t_tail_rows = DF.tail_df[DF.tail_df[DF.time_col] == max_t]
-            for t_idx, row in max_t_tail_rows.iterrows():
-                prev_id = row['idx'] - 1
+        if t_idx_mrg >= 0:
+            for t_idx, row in DF.tail_df.iterrows():
+                n = 0
+                t = DF.dataframes[t_idx].loc[row['idx'] - n][time_col]
+                while t > t_idx_mrg and t_idx_mrg >= 0:
+                    n += 1
+                    t = DF.dataframes[t_idx].loc[row['idx'] - n][time_col]
+                prev_id = row['idx'] - n
                 data_row = DF.dataframes[t_idx].loc[prev_id]
-                id_row = pd.Series({"idx":prev_id})
+                id_row = pd.Series({"idx": prev_id})
                 full_row = pd.concat([data_row, id_row])
                 DF.tail_df.loc[t_idx] = full_row
+
         else:
             merged_df = merged_df.sort_values(by=time_col).reset_index(drop=True)
             print(merged_df.head())
@@ -84,7 +100,7 @@ for v in values:
     for s in FC.Strategy:
         s_df = create_new_df(time_col, s.name, v, num_files)
         val_df = pd.concat([val_df, s_df])
-    filename = f"fisie_merged_{v}.csv"
+    filename = f"fisie_merged_{suffix}{v}.csv"
     val_df = val_df.sort_values(by=time_col).reset_index(drop=True)
     val_df.to_csv(filename, index=False)
 

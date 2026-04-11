@@ -89,11 +89,7 @@ class Strategy(Enum):
 
 class Audit:
     # sample_length - float [0,1], fnode FogNode
-    def __init__(self, sample_length, fnode):
-        self.sample_length = sample_length
-        self.full = False
-        if self.sample_length == 1:
-            self.full = True
-
-
-        pass
+    def __init__(self, fnode, oracle=True, audit_pass = True):
+        self.fog_node = fnode
+        self.type = (oracle == True)
+        self.audit_pass = (audit_pass == True)

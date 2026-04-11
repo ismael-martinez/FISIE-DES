@@ -2,7 +2,9 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-csvfile_name = "fisie_state_data_0.csv"
+ratio = '0-05_'
+csvfile_name = f"fisie_merged_ar_{ratio}avg_reputation.csv"
+#csvfile_name = f"fisie_state_data_ar_{ratio}0.csv"
 df = pd.read_csv(csvfile_name)
 
 # Plot Parameters
@@ -24,8 +26,8 @@ plt.title("Reputation over Time by Strategy")
 plt.tight_layout()
 plt.show()
 
-# csvfile_name = "fisie_merged_avg_profit.csv"
-# df = pd.read_csv(csvfile_name)
+csvfile_name = f"fisie_merged_ar_{ratio}avg_profit.csv"
+df = pd.read_csv(csvfile_name)
 
 plt.figure(figsize=(8, 4.6))
 for i, s in enumerate(strats):
@@ -41,8 +43,8 @@ plt.tight_layout()
 plt.show()
 
 
-# csvfile_name = "fisie_merged_fog_count.csv"
-# df = pd.read_csv(csvfile_name)
+csvfile_name = f"fisie_merged_ar_{ratio}fog_count.csv"
+df = pd.read_csv(csvfile_name)
 
 plt.figure(figsize=(8, 4.6))
 for i, s in enumerate(strats):
