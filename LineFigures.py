@@ -9,11 +9,11 @@ df = pd.read_csv(csvfile_name)
 
 # Plot Parameters
 strats = ['Conservative', 'Aggressive', 'Cyclic', 'Balanced', 'Opportunistic']
-# Dark Blue, Sky Blue, Reddish-Orange, Green, Pinkish-Purple
-colours = ['#0072B2', '#56B4E9', '#F54A00', '#009E73', '#AA00AA']
+# Dark Blue, Reddish-Orange, Green, Sky Blue, Pinkish-Purple
+colours = ['#0072B2', '#F54A00', '#009E73', '#E69F00', '#AA00AA']
 dashes = ['-', '--', '-.', ':', (0,(4,1,1,1,1,1))]
 
-plt.figure(figsize=(8, 4.6))
+plt.figure(figsize=(9, 5))
 for i, s in enumerate(strats):
     df_strat = df[df['strategy']==s]
     avg_rep = df_strat['avg_reputation']
@@ -29,7 +29,7 @@ plt.show()
 csvfile_name = f"fisie_merged_ar_{ratio}avg_profit.csv"
 df = pd.read_csv(csvfile_name)
 
-plt.figure(figsize=(8, 4.6))
+plt.figure(figsize=(9, 5))
 for i, s in enumerate(strats):
     df_strat = df[df['strategy']==s]
     avg_profit = df_strat['avg_profit']
@@ -46,7 +46,7 @@ plt.show()
 csvfile_name = f"fisie_merged_ar_{ratio}fog_count.csv"
 df = pd.read_csv(csvfile_name)
 
-plt.figure(figsize=(8, 4.6))
+plt.figure(figsize=(9, 5))
 for i, s in enumerate(strats):
     df_strat = df[df['strategy']==s]
     fog_count = df_strat['fog_count']

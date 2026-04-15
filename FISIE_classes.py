@@ -60,7 +60,7 @@ class FogNode:
         self.profit = 0 # Accumulated payments
         self.active = True
         if self.strategy is Strategy.Cyclic:
-            self.threshold = 0.6 + 0.3 * random()
+            self.threshold = 6 + 3 * random()
         self.update_honesty() # initial honesty
 
         FogNode.fog_id+=1

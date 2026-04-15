@@ -6,7 +6,6 @@ import simpy
 import FISIE_classes as FC
 from FISIE_classes import IoTDevices as IoT
 from FISIE_classes import IIMSC
-import BetaDistribution as BD
 import AuditSelection as AS
 import numpy as np
 import csv
