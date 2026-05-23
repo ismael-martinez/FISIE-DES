@@ -1,7 +1,7 @@
 import FISIE_classes as FC
 import math
 from random import random
-import BetaDistribution as BD
+import StrategyDistributions as BD
 
 T = 10 # temperature
 # Oracle audit

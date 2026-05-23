@@ -1,7 +1,9 @@
 from scipy.stats import beta as BetaDist
 from enum import Enum
-import BetaDistribution as BD
+import StrategyDistributions as BD
 from random import random
+import numpy.random as np_rand
+import numpy as np
 
 # static
 class IIMSC:
@@ -15,9 +17,6 @@ class IIMSC:
 
 # static
 class IoTDevices:
-
-    cost = 0.1
-    gamma = 0.05
     alpha = 1
     beta = 10
     @staticmethod
@@ -26,10 +25,12 @@ class IoTDevices:
 
     @staticmethod
     def rep_threshold(self):
-        return BetaDist.rvs(2,5)
+        return 10*BetaDist.rvs(2,5)
 
     @staticmethod
     def prob_pass_audit(fog_node):
+        if random() < 0.25: # No partial verification
+            return 1
         ell = IoTDevices.partial_sample_length()
         h = fog_node.honesty
         if ell > h:
@@ -38,14 +39,15 @@ class IoTDevices:
             return 1
         else: # 0 < ell <= h < 1
             eta = (h-ell)/(1-ell)
+            if eta > h:
+                print("Error, eta > h")
             return eta
 
     @staticmethod
-    def payment(fog_node):
-        norm_r = (fog_node.reputation - IIMSC.rep_min)/(IIMSC.rep_max - IIMSC.rep_min)
-        payment = IoTDevices.cost + IoTDevices.gamma * norm_r
-        return payment
-
+    def cost_payment():
+        cost = np_rand.gamma(3, 0.05)
+        payment = cost * (1 + BetaDist.rvs(2, 10))
+        return [cost, payment]
 
 
 class FogNode:
@@ -59,6 +61,9 @@ class FogNode:
         self.deposit = IIMSC.deposit
         self.profit = 0 # Accumulated payments
         self.active = True
+        self.audit_total = 0
+        self.audits_passed = 0
+        self.pass_rate = np.nan
         if self.strategy is Strategy.Cyclic:
             self.threshold = 6 + 3 * random()
         self.update_honesty() # initial honesty
@@ -79,6 +84,10 @@ class FogNode:
             case _:
                 print("Not a valid strategy")
 
+    def update_rate(self, audit_passed):
+        self.audit_total += 1
+        self.audits_passed += (audit_passed == 1)
+        self.pass_rate = self.audits_passed / self.audit_total
 
 class Strategy(Enum):
     Aggressive = 0

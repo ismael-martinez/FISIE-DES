@@ -45,7 +45,7 @@ class FisieDataFrames(object):
         std = np.std(self.tail_df[self.time_col])
         min = np.min(self.tail_df[self.time_col])
         max = np.max(self.tail_df[self.time_col])
-        print(f"Strategy: {self.strategy}, Mean: {mean}, Var: {std}, Min: {min}, Max: {max}")
+        print(f"Strategy: {self.strategy}, Mean: {mean}, Std: {std}, Min: {min}, Max: {max}")
 
     def get_oracle_audits(self):
         oracle_audits = []
@@ -55,8 +55,8 @@ class FisieDataFrames(object):
         mean = np.mean(oracle_audits)
         min = np.min(oracle_audits)
         max = np.max(oracle_audits)
-        var = np.var(oracle_audits)
-        print(f"Strategy: {self.strategy}, Mean: {mean}, Var: {var}, Min: {min}, Max: {max}")
+        std = np.std(oracle_audits)
+        print(f"Strategy: {self.strategy}, Mean: {mean}, Std: {std}, Min: {min}, Max: {max}")
 
     def get_iot_audits(self):
         iot_audits = []
@@ -72,8 +72,8 @@ class FisieDataFrames(object):
             mean = np.mean(v)
             min = np.min(v)
             max = np.max(v)
-            var = np.var(v)
-            print(f"Strategy: {self.strategy}, Mean: {mean}, Var: {var}, Min: {min}, Max: {max}")
+            std = np.std(std)
+            print(f"Strategy: {self.strategy}, Mean: {mean}, Std: {std}, Min: {min}, Max: {max}")
 
 
 

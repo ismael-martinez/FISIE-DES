@@ -70,11 +70,15 @@ def create_new_df(time_col, strategy, val_col, num_files):
         t_idx_mrg = round(t_idx_mrg, 2)
 
         # adjust tail_df
-        if t_idx_mrg >= 0:
+        check = (t_idx_mrg > 0) # avg_pr, avg_honesty
+        if val_col in ["avg_reputation", "avg_profit", "fog_count"]:
+            check = (t_idx_mrg >= 0)
+        if check:
             for t_idx, row in DF.tail_df.iterrows():
                 n = 0
                 t = DF.dataframes[t_idx].loc[row['idx'] - n][time_col]
-                while t > t_idx_mrg and t_idx_mrg >= 0:
+                ridx = row['idx']
+                while t > t_idx_mrg  and ridx > n:
                     n += 1
                     t = DF.dataframes[t_idx].loc[row['idx'] - n][time_col]
                 prev_id = row['idx'] - n
@@ -92,7 +96,7 @@ def create_new_df(time_col, strategy, val_col, num_files):
 
 
 # Read DataFrames
-values = ["avg_reputation", "avg_profit", "fog_count"]
+values = ["fog_count"] #["avg_reputation", "avg_profit", "avg_pr", "fog_count"]
 time_col = "Time"
 num_files = 50
 for v in values:
