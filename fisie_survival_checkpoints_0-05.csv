@@ -1,0 +1,16 @@
+Motivation - incentives and deterrent
+Fog state - reputation and collateral
+Incentive mechanisms - rewards and penalties
+Short-term consequences - service request traffic, profit
+Long-term consequences - participation and profitability
+Simulation metrics - reputation, net profit, node survival
+
+
+The Progressive strategy initially exhibits behaviour similar to the Aggressive strategy, with low reputation and early ejection due to low honesty. As collateral is depleted, however, surviving nodes become progressively more honest, allowing reputation to recover toward levels comparable to Conservative nodes. This transition slows further ejections and extends node survival. 
+
+The Opportunistic strategy exhibits behaviour similar to the Balanced strategy, as the inverse reputation--honesty relationship causes nodes to converge toward moderate honesty levels. Unlike the Balanced strategy, however, honesty continuously adapts to reputation. Nodes with declining reputation become more honest, while nodes with high reputation become less honest. This produces greater variation in node behaviour and allows a subset of nodes to recover reputation and remain active for longer periods, resulting in later survival checkpoints than the Balanced strategy.
+
+In both cases, adaptive behaviour extends node survival relative to their corresponding benchmark strategy (Progressive relative to Aggressive, and Opportunistic relative to Balanced). The longer survival period also increases cumulative exposure to verification and audit penalties, resulting in slightly lower net profit despite improved survival.
+
+
+

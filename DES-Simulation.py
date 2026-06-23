@@ -1,5 +1,5 @@
 import random
-seed_base = 250
+seed_base = 150
 
 import simpy
 
@@ -31,6 +31,7 @@ def audit_selection_oracle(env):
         fn = AS.audit_selection(fog_nodes)
         if VERBOSE:
             print(f"Selected fog node with id {fn.fog_id}")
+        honesty_decision(env, fn)
         audit_observation(env,fn)
 def audit_selection_iot(env):
     while True:
@@ -43,6 +44,7 @@ def audit_selection_iot(env):
         fn = AS.audit_selection(fog_nodes, False)
         if VERBOSE:
             print(f"Selected fog node with id {fn.fog_id}")
+        honesty_decision(env, fn)
         audit_observation(env, fn, False)
 
 def audit_observation(env, fog_node, oracle=True):
@@ -59,6 +61,7 @@ def audit_observation(env, fog_node, oracle=True):
                 print(f"Fog node {fog_node.fog_id} passed Oracle audit at {env.now}")
             #passed_audit = True
     else: # IoT
+
         eta = IoT.prob_pass_audit(fog_node)
         if random.random() > eta: # failure
             if VERBOSE:
@@ -86,21 +89,19 @@ def reputation_update(env):
             print(f"Fog node {fog_node.fog_id} reputation increased to {fog_node.reputation} at {env.now}")
     else:
         fog_node.reputation -= IIMSC.rep_dec
-        fog_node.deposit -= IIMSC.deposit_dec
-        if fog_node.deposit <= 0 or fog_node.reputation < IIMSC.rep_min:
+        fog_node.collateral -= IIMSC.collateral_dec
+        if fog_node.collateral <= 0 or fog_node.reputation < IIMSC.rep_min:
             if VERBOSE:
                 print(f"Fog node {fog_node.fog_id} is ejected from the system at {env.now}")
             fog_node.active = False
             ejected = True
         else:
             if VERBOSE:
-                print(f"Fog node {fog_node.fog_id} has {fog_node.reputation} reputation and {fog_node.deposit} deposit remaining at {env.now}")
+                print(f"Fog node {fog_node.fog_id} has {fog_node.reputation} reputation and {fog_node.collateral} deposit remaining at {env.now}")
     state_update(env)
-    if not ejected:
-        honesty_update(env)
 
-def honesty_update(env):
-    fog_node = Audit.fog_node
+
+def honesty_decision(env, fog_node):
     if VERBOSE:
         print(f"Fog node {fog_node.fog_id} updating honesty at {env.now}")
     fog_node.update_honesty()
@@ -112,26 +113,32 @@ def state_update(env):
         print(f"Updating state at {env.now} for {fn_strategy.name} strategy")
 
     strat_fog_reps = [f.reputation for f in fog_nodes if f.active and f.strategy == fn_strategy]
-    strat_fog_profits = [(f.profit - IIMSC.deposit + f.deposit) for f in fog_nodes
-                                     if f.active and f.strategy == fn_strategy]
-    strat_fog_honesty = [f.honesty for f in fog_nodes if f.active and f.strategy == fn_strategy]
-    strat_fog_pr = [f.pass_rate for f in fog_nodes if f.active and f.strategy == fn_strategy and not np.isnan(f.pass_rate)]
+    # strat_fog_reps_coll_weighted = [f.reputation*f.collateral for f in fog_nodes if f.active and f.strategy == fn_strategy]
+    # strat_fog_collateral = [f.collateral for f in fog_nodes if f.active and f.strategy == fn_strategy]
+    strat_fog_profits = [(f.profit) for f in fog_nodes
+                                     if f.strategy == fn_strategy]
+    strat_fog_reliability = [((f.reputation-2)/8.*f.collateral/5.) for f in fog_nodes
+                             if f.active and f.strategy == fn_strategy]
+
+    #strat_fog_honesty = [f.honesty for f in fog_nodes if f.active and f.strategy == fn_strategy]
     strat_rep_avg, fog_count = np.nan, 0
+    #strat_rep_avg_cw = np.nan
     if len(strat_fog_reps) > 0:
         strat_rep_avg, fog_count = np.mean(strat_fog_reps), len(strat_fog_reps)
+        #strat_rep_avg_cw = np.sum(strat_fog_reps_coll_weighted)/np.sum(strat_fog_collateral)
     strat_profit_avg = np.nan
     if len(strat_fog_profits) > 0:
         strat_profit_avg = np.mean(strat_fog_profits)
-    strat_honesty_avg = np.nan
-    if len(strat_fog_honesty) > 0:
-        strat_honesty_avg = np.mean(strat_fog_honesty)
-    strat_pr_avg = np.nan
-    if len(strat_fog_honesty) > 0 and not np.isnan(strat_honesty_avg):
-        strat_pr_avg = np.mean(strat_fog_pr)
+    strat_reliability_avg = np.nan
+    if len(strat_fog_reliability) > 0:
+        strat_reliability_avg = np.mean(strat_fog_reliability)
+    # strat_honesty_avg = np.nan
+    # if len(strat_fog_honesty) > 0:
+    #     strat_honesty_avg = np.mean(strat_fog_honesty)
 
     # Append to csv
-    ## ['Time', 'strategy', 'avg_reputation', 'rep_count', 'avg_profit', 'prof_count', 'avg_honesty']
-    new_row = [env.now, fn_strategy.name, fog_count, strat_rep_avg, strat_profit_avg, strat_honesty_avg, strat_pr_avg, Audit.type, Audit.audit_pass]
+
+    new_row = [env.now, Audit.audit_cycle, fn_strategy.name, fog_count, strat_rep_avg, strat_profit_avg, strat_reliability_avg, Audit.type, Audit.audit_pass]
     with open(csvfile_name, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(new_row)
@@ -139,13 +146,14 @@ def state_update(env):
 def service_payment(env):
     fog_node = Audit.fog_node
     passed_audit = Audit.audit_pass
+    oracle_audit = Audit.type
     # Service Payment
     cost, payment = IoT.cost_payment()
     fog_node.profit -= fog_node.honesty * cost
-    if passed_audit:
+    if passed_audit or oracle_audit:
         fog_node.profit += payment
-    else:
-        fog_node.profit -= IIMSC.deposit_dec
+    if not passed_audit:
+        fog_node.profit -= IIMSC.collateral_dec
 
 def verify_continue(env):
     active_count = len([f for f in fog_nodes if f.active])
@@ -159,6 +167,8 @@ def verify_continue(env):
 for sim in range(0, 50):
     print(f"Simulation {sim}")
     random.seed = seed_base + sim
+    # Reset Audit cycle count
+    FC.Audit.audit_cycle = 0
 
     ####### Setup #######
 
@@ -178,7 +188,7 @@ for sim in range(0, 50):
     # Payment - Cost over time
     payment_state = []
     # Store states in csv file
-    fieldnames = ['Time', 'strategy', 'fog_count', 'avg_reputation', 'avg_profit', 'avg_honesty', 'avg_pr', 'audit_type', 'audit_result']
+    fieldnames = ['Time', 'audit_cycle', 'strategy', 'fog_count', 'avg_reputation', 'avg_profit', 'avg_reliability',  'audit_type', 'audit_result']
 
     csvfile_name = "fisie_state_data_{}{}.csv".format(suffix, sim)
     with open(csvfile_name, 'w', newline='') as csvfile:
@@ -186,7 +196,7 @@ for sim in range(0, 50):
         writer.writeheader()
         writer = csv.writer(csvfile)
         for s in range(num_strategies):
-            first_row = [0, FC.Strategy(s).name, fog_per, IIMSC.rep_init, 0, np.nan, np.nan]
+            first_row = [0, 0, FC.Strategy(s).name, fog_per, IIMSC.rep_init,  0, 5./8]
             writer.writerow(first_row)
 
     ######### Simpy #########

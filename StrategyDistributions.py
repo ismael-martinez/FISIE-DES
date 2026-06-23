@@ -3,14 +3,22 @@ from scipy.stats import beta as BetaDist
 import numpy as np
 
 ab_min = 2
-ab_max = 10
+ab_max = 12
 
 R_min = 2
 R_max = 10
 
+D = 5 # deposit
+d_pen = 1 # collateral penalty
+
 def opportunistic_strat(r):
     alpha = ab_max - (ab_max - ab_min) * ((r - R_min) / (R_max - R_min))
     beta = ab_min + (ab_max - ab_min) * ((r - R_min) / (R_max - R_min))
+    return beta_sample(alpha, beta)
+
+def progressive_strat(d): # collateral deposit remaining
+    alpha = ab_min + (ab_max - ab_min) * ((D - d) / (D - d_pen))
+    beta = ab_max - (ab_max - ab_min) * ((D - d) / (D - d_pen))
     return beta_sample(alpha, beta)
 
 def balanced_strat():
@@ -26,12 +34,6 @@ def aggressive_strat():
     alpha = ab_min
     beta = ab_max
     return beta_sample(alpha, beta)
-
-def cyclic_strat(r, R):
-    if r > R:
-        return aggressive_strat()
-    else:
-        return conservative_strat()
 
 def partial_length():
     alpha = 1
@@ -67,7 +69,7 @@ def plot_beta():
         plt.plot(x,y, label=plt_label, linestyle=dashes[i], color=colours[i])
 
     plt.legend()
-    plt_title = r'Beta Distributions for Behavioural Strategies—$(a_{\min},a_{\max})=$'
+    plt_title = r'Beta Distributions for Behavioural Strategies—$(b_{\min},b_{\max})=$'
     vals = '({}, {})'.format(ab_min, ab_max)
     plt.title(plt_title + vals)
     plt.xlabel(r'Honesty Factor $h$', fontsize=10)
@@ -75,4 +77,4 @@ def plot_beta():
     plt.tight_layout()
     plt.show()
 
-# plot_beta()
+#plot_beta()

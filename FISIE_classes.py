@@ -12,7 +12,7 @@ class IIMSC:
     rep_init = 7 # R_init
     rep_inc = 1  # r^+
     rep_dec = 3  # r^-
-    deposit_dec = 1  # d^-
+    collateral_dec = 1  # d^-
     deposit = 5  # D
 
 # static
@@ -29,8 +29,9 @@ class IoTDevices:
 
     @staticmethod
     def prob_pass_audit(fog_node):
-        if random() < 0.25: # No partial verification
+        if random() < 0.2: # No partial verification
             return 1
+        Audit.audit_cycle += 1
         ell = IoTDevices.partial_sample_length()
         h = fog_node.honesty
         if ell > h:
@@ -58,14 +59,12 @@ class FogNode:
         self.honesty = 0
         self.threshold = 0
         self.strategy = strat
-        self.deposit = IIMSC.deposit
+        self.collateral = IIMSC.deposit
         self.profit = 0 # Accumulated payments
         self.active = True
         self.audit_total = 0
         self.audits_passed = 0
         self.pass_rate = np.nan
-        if self.strategy is Strategy.Cyclic:
-            self.threshold = 6 + 3 * random()
         self.update_honesty() # initial honesty
 
         FogNode.fog_id+=1
@@ -77,8 +76,8 @@ class FogNode:
                 self.honesty = BD.conservative_strat()
             case Strategy.Balanced:
                 self.honesty = BD.balanced_strat()
-            case Strategy.Cyclic:
-                self.honesty = BD.cyclic_strat(self.reputation, self.threshold)
+            case Strategy.Progressive:
+                self.honesty = BD.progressive_strat(self.collateral)
             case Strategy.Opportunistic:
                 self.honesty = BD.opportunistic_strat(self.reputation)
             case _:
@@ -93,12 +92,13 @@ class Strategy(Enum):
     Aggressive = 0
     Conservative = 1
     Balanced = 2
-    Cyclic = 3
+    Progressive = 3
     Opportunistic = 4
 
 class Audit:
-    # sample_length - float [0,1], fnode FogNode
+    audit_cycle = 1
     def __init__(self, fnode, oracle=True, audit_pass = True):
         self.fog_node = fnode
         self.type = (oracle == True)
         self.audit_pass = (audit_pass == True)
+        self.audit_cycle = Audit.audit_cycle

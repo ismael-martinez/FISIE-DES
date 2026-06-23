@@ -71,7 +71,7 @@ def create_new_df(time_col, strategy, val_col, num_files):
 
         # adjust tail_df
         check = (t_idx_mrg > 0) # avg_pr, avg_honesty
-        if val_col in ["avg_reputation", "avg_profit", "fog_count"]:
+        if val_col in ["avg_reputation", "avg_reliability", "avg_profit", "fog_count"]:
             check = (t_idx_mrg >= 0)
         if check:
             for t_idx, row in DF.tail_df.iterrows():
@@ -96,7 +96,7 @@ def create_new_df(time_col, strategy, val_col, num_files):
 
 
 # Read DataFrames
-values = ["fog_count"] #["avg_reputation", "avg_profit", "avg_pr", "fog_count"]
+values = ["avg_reputation",  "avg_profit", "fog_count"]
 time_col = "Time"
 num_files = 50
 for v in values:
