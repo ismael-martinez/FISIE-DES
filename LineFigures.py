@@ -12,7 +12,7 @@ strats = ['Conservative', 'Aggressive', 'Balanced', 'Progressive', 'Opportunisti
 colours = ['#0072B2', '#F54A00', '#E69F00', '#009E73', '#AA00AA']
 markers = ['p', 'H', '*', '^', 'v']
 dashes = ['-', '--', ':', '-.', (0,(4,1,1,1,1,1))]
-plt_figsize = (8.5,6)
+plt_figsize = (11,6)
 
 csvfile_name = f"fisie_merged_ar_{ratio}_avg_reputation.csv"
 df = pd.read_csv(csvfile_name)
@@ -32,7 +32,7 @@ for i, s in enumerate(strats):
     # plt.scatter(s_df_rep['Time'], s_df_rep['reputation'], color=colours[i], marker='.')
 plt.xlabel(r"Time $t$", fontsize=12)
 plt.ylabel(r"Avg. Reputation $r_f(t)$", fontsize=12)
-plt.legend(title="Legend — Strategies", title_fontproperties={'weight': 'bold', 'size': 'small'}, loc=3, handlelength=4.0)
+plt.legend(title="Legend — Strategies", title_fontproperties={'weight': 'bold', 'size': 'small'}, loc=3, handlelength=3)
 plt.title("Reputation over Time by Strategy", fontsize=14)
 plt.tight_layout()
 plt.show()
@@ -55,8 +55,8 @@ for i, s in enumerate(strats):
     # plt.scatter(s_df_pr['Time'], s_df_pr['profit'], color=colours[i], markevery=markers_on, marker=markers[i])
 plt.xlabel(r"Time $t$", fontsize=12)
 plt.ylabel(r"Avg. Net Profit $\psi_f(t)$", fontsize=12)
-plt.legend(title="Legend — Strategies", title_fontproperties={'weight': 'bold', 'size': 'small'}, loc=3, handlelength=4.0)
-plt.title("Profit over Time by Strategy", fontsize=14)
+plt.legend(title="Legend — Strategies", title_fontproperties={'weight': 'bold', 'size': 'small'}, loc=3, handlelength=3.0)
+plt.title("Net Profit over Time by Strategy", fontsize=14)
 plt.tight_layout()
 #plt.yscale('log')
 plt.show()

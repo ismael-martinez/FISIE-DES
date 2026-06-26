@@ -11,7 +11,7 @@ pr_df = pd.read_csv(f"fisie_merged_ar_{ratio}_avg_profit.csv")
 rel_df = pd.read_csv(f"fisie_merged_ar_{ratio}_avg_reliability.csv")
 
 time_col = "Time"
-val_df = pd.DataFrame({time_col: [], "strategy": [], "percent":[], "reputation":[], "rep_idx":[], "profit":[], "pr_idx":[], "reliability":[], "rel_idx":[]})
+val_df = pd.DataFrame({time_col: [], "strategy": [], "percent":[], "reputation":[], "rep_idx":[], "profit":[], "pr_idx":[]})#, "reliability":[], "rel_idx":[]})
 percentile_step = 0.25
 i = 1 # start
 j = 1./percentile_step # end non-inclusive (< j)
@@ -34,12 +34,12 @@ for s in FC.Strategy:
             pr_row = pr_df_s.loc[(pr_df_s['Time'] == time), "avg_profit"]
             pr = (pr_row.iloc[0], pr_row.index[0])
 
-            rel_df_s = rel_df.loc[(rel_df['strategy']==s.name)]
-            rel_df_s = rel_df_s.reset_index(drop=True)
-            rel_row = rel_df_s.loc[(rel_df_s['Time']== time), "avg_reliability"]
-            rel = (rel_row.iloc[0], rel_row.index[0])
+            # rel_df_s = rel_df.loc[(rel_df['strategy']==s.name)]
+            # rel_df_s = rel_df_s.reset_index(drop=True)
+            # rel_row = rel_df_s.loc[(rel_df_s['Time']== time), "avg_reliability"]
+            # rel = (rel_row.iloc[0], rel_row.index[0])
 
-            val_df.loc[len(val_df)] = [row['Time'], row['strategy'], percentile, rep[0], rep[1], pr[0], pr[1], rel[0], rel[1]]
+            val_df.loc[len(val_df)] = [row['Time'], row['strategy'], percentile, rep[0], rep[1], pr[0], pr[1]]
             percentile -= percentile_step
             count_steps = total_fog_count * percentile
             i += 1

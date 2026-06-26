@@ -1,16 +1,21 @@
-Motivation - incentives and deterrent
-Fog state - reputation and collateral
-Incentive mechanisms - rewards and penalties
-Short-term consequences - service request traffic, profit
-Long-term consequences - participation and profitability
-Simulation metrics - reputation, net profit, node survival
-
-
-The Progressive strategy initially exhibits behaviour similar to the Aggressive strategy, with low reputation and early ejection due to low honesty. As collateral is depleted, however, surviving nodes become progressively more honest, allowing reputation to recover toward levels comparable to Conservative nodes. This transition slows further ejections and extends node survival. 
-
-The Opportunistic strategy exhibits behaviour similar to the Balanced strategy, as the inverse reputation--honesty relationship causes nodes to converge toward moderate honesty levels. Unlike the Balanced strategy, however, honesty continuously adapts to reputation. Nodes with declining reputation become more honest, while nodes with high reputation become less honest. This produces greater variation in node behaviour and allows a subset of nodes to recover reputation and remain active for longer periods, resulting in later survival checkpoints than the Balanced strategy.
-
-In both cases, adaptive behaviour extends node survival relative to their corresponding benchmark strategy (Progressive relative to Aggressive, and Opportunistic relative to Balanced). The longer survival period also increases cumulative exposure to verification and audit penalties, resulting in slightly lower net profit despite improved survival.
-
-
-
+strategy,quartile,cycle_mean,cycle_sd
+Aggressive,0.0,39955.66,2796.9956139400715
+Aggressive,0.25,18439.44,469.34397450057884
+Aggressive,0.5,12347.96,330.31130528639187
+Aggressive,0.75,7183.64,270.69804284479045
+Conservative,0.0,81435.1,1639.7535699000628
+Conservative,0.25,72043.0,1616.6444507064625
+Conservative,0.5,58773.42,1581.946738547161
+Conservative,0.75,41378.22,1367.653542239408
+Balanced,0.0,56914.28,3064.477743694674
+Balanced,0.25,28419.0,539.9317734677225
+Balanced,0.5,20647.84,519.3580021526576
+Balanced,0.75,12929.0,552.6997014654522
+Progressive,0.0,41990.34,5223.735983412638
+Progressive,0.25,18445.08,446.6349220560345
+Progressive,0.5,12333.7,399.08170842573077
+Progressive,0.75,7137.64,279.9073961152152
+Opportunistic,0.0,66674.82,3677.614458803424
+Opportunistic,0.25,33328.42,758.3171391970512
+Opportunistic,0.5,24323.8,576.6420033261538
+Opportunistic,0.75,15526.6,604.9342443604924

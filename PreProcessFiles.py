@@ -101,6 +101,7 @@ time_col = "Time"
 num_files = 50
 for v in values:
     val_df = pd.DataFrame({time_col:[], "strategy": [], v:[]})
+    print(v)
     for s in FC.Strategy:
         s_df = create_new_df(time_col, s.name, v, num_files)
         val_df = pd.concat([val_df, s_df])

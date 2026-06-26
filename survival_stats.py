@@ -20,7 +20,7 @@ for s in FC.Strategy:
 
 for f in range(num_files):
     file_name = f"{base_file}{suffix}{f}.csv"
-    df = pd.read_csv(file_name)
+    df = pd.read_csv(file_name, low_memory=False)
     for s in FC.Strategy:
         s_df = df.loc[df['strategy']==s.name, ['Time', 'audit_cycle', 'fog_count']]
         for q in range(3,-1, -1):
