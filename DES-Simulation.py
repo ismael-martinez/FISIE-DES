@@ -11,13 +11,18 @@ import numpy as np
 import csv
 
 # Arrival Rates
-oracle_AR = 5
-IoT_AR = 100
+oracle_AR = 1
+IoT_AR = 40
 oracle_iot_fraction =  oracle_AR/IoT_AR
 VERBOSE = False
 suffix = f"ar_{oracle_iot_fraction}_"
 suffix = suffix.replace('.','-')
+folder="sim"
 Audit = None
+
+fog_per = 1000
+num_strategies = 5
+
 
 # Simpy Processes
 def audit_selection_oracle(env):
@@ -73,7 +78,7 @@ def audit_observation(env, fog_node, oracle=True):
             #passed_audit = True
     global Audit
     Audit = FC.Audit(fog_node, oracle, passed_audit)
-    fog_node.update_rate(passed_audit)
+    #fog_node.update_rate(passed_audit)
     service_payment(env)
     reputation_update(env)
 
@@ -143,7 +148,7 @@ def state_update(env):
 
     # Append to csv
 
-    new_row = [env.now, Audit.audit_cycle, fn_strategy.name, fog_count, strat_rep_avg, strat_collateral_avg, strat_profit_avg, strat_honesty_avg,  Audit.type, Audit.audit_pass]
+    new_row = [env.now, Audit.audit_cycle, fn_strategy.name, fog_count, strat_rep_avg, strat_collateral_avg, strat_profit_avg,  Audit.type, Audit.audit_pass]
     with open(csvfile_name, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(new_row)
@@ -178,8 +183,6 @@ for sim in range(0, 50):
     ####### Setup #######
 
     # f fog nodes per strategy (5)
-    fog_per = 1000
-    num_strategies = 5
     fog_nodes = [None]*(fog_per * num_strategies)
     for s in range(num_strategies):
         for f in range(fog_per):
@@ -193,15 +196,15 @@ for sim in range(0, 50):
     # Payment - Cost over time
     payment_state = []
     # Store states in csv file
-    fieldnames = ['Time', 'audit_cycle', 'strategy', 'fog_count', 'avg_reputation', 'avg_collateral', 'avg_profit', 'avg_honesty',  'audit_type', 'audit_result']
+    fieldnames = ['Time', 'audit_cycle', 'strategy', 'fog_count', 'avg_reputation', 'avg_collateral', 'avg_profit',  'audit_type', 'audit_result']
 
-    csvfile_name = "fisie_state_data_{}{}.csv".format(suffix, sim)
+    csvfile_name = "{}/fisie_state_data_{}{}.csv".format(folder,suffix, sim)
     with open(csvfile_name, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         writer = csv.writer(csvfile)
         for s in range(num_strategies):
-            first_row = [0, 0, FC.Strategy(s).name, fog_per, IIMSC.rep_init, IIMSC.deposit,  0, np.nan]
+            first_row = [0, 0, FC.Strategy(s).name, fog_per, IIMSC.rep_init, IIMSC.deposit,  0]
             writer.writerow(first_row)
 
     ######### Simpy #########
@@ -209,5 +212,3 @@ for sim in range(0, 50):
     env.process(audit_selection_oracle(env))
     env.process(audit_selection_iot(env))
     env.run(until=5000)
-
-    # System end when no fog node remain active

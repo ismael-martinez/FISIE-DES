@@ -11,9 +11,9 @@ class IIMSC:
     rep_max = 10  # R_max
     rep_init = 7 # R_init
     rep_inc = 1  # r^+
-    rep_dec = 2  # r^-
+    rep_dec = 2.5  # r^-
     collateral_dec = 1  # d^-
-    deposit = 5  # D
+    deposit = 3  # D
 
 # static
 class IoTDevices:

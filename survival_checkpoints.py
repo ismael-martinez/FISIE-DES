@@ -2,13 +2,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import FISIE_classes as FC
 
-ratio = '0-05'
+ratio = '0-025'
 csvfile_name = f"fisie_merged_ar_{ratio}_fog_count.csv"
 df = pd.read_csv(csvfile_name)
 
 rep_df = pd.read_csv(f"fisie_merged_ar_{ratio}_avg_reputation.csv")
 pr_df = pd.read_csv(f"fisie_merged_ar_{ratio}_avg_profit.csv")
-rel_df = pd.read_csv(f"fisie_merged_ar_{ratio}_avg_reliability.csv")
 
 time_col = "Time"
 val_df = pd.DataFrame({time_col: [], "strategy": [], "percent":[], "reputation":[], "rep_idx":[], "profit":[], "pr_idx":[]})#, "reliability":[], "rel_idx":[]})

@@ -3,9 +3,9 @@ import pandas as pd
 import FISIE_classes as FC
 import numpy as np
 
-ratio =  '0-05'
+ratio =  '0-025'
 suffix = f"ar_{ratio}_"
-base_file = "fisie_state_data_"
+base_file = "sim/fisie_state_data_"
 
 fog_total = 1000
 steps = 0.25
@@ -25,6 +25,7 @@ for f in range(num_files):
         s_df = df.loc[df['strategy']==s.name, ['Time', 'audit_cycle', 'fog_count']]
         for q in range(3,-1, -1):
             s_df_q = s_df.loc[s_df['fog_count']==q*steps*fog_total, 'audit_cycle']
+            print(f)
             quartile_arrays[s.name][q*steps].append(s_df_q.iloc[0])
 
 new_df = pd.DataFrame({'strategy':[], 'quartile':[], 'cycle_mean':[], 'cycle_sd':[]})

@@ -27,4 +27,3 @@ def audit_selection(fog_nodes, oracle=True): #if false, IoT
         if r < selection_dist[i]:
             return a
         # else continue
-

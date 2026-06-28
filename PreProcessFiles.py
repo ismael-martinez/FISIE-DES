@@ -3,11 +3,11 @@ import numpy as np
 import FISIE_classes as FC
 import math
 
-STEP = 0.05
+STEP = 1
 t_idx_mrg = 0 # will set later
 
-suffix = "ar_0-05_"
-base_file = "fisie_state_data_"
+suffix = "ar_0-025_"
+base_file = "sim/fisie_state_data_"
 
 
 class FisieDataFrames(object):
@@ -57,7 +57,7 @@ def create_new_df(time_col, strategy, val_col, num_files):
 
     # Find maximum timestamp from tail_df - becomes starting point for merged_df
     t_idx_mrg = DF.tail_df[time_col].max()
-    t_idx_mrg = math.ceil(t_idx_mrg*20)/20 # Round up to nearest 0.05
+    t_idx_mrg = math.ceil(t_idx_mrg) # Round up to nearest 0.05
 
     while True:
         # Mean value
