@@ -7,7 +7,7 @@ ratio =  '0-025'
 suffix = f"ar_{ratio}_"
 base_file = "sim/fisie_state_data_"
 
-fog_total = 1000
+fog_total = 500
 steps = 0.25
 num_files = 50
 

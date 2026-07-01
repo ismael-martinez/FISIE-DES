@@ -12,7 +12,7 @@ strats = ['Conservative', 'Aggressive', 'Balanced', 'Progressive', 'Opportunisti
 colours = ['#0072B2', '#F54A00', '#E69F00', '#009E73', '#AA00AA']
 markers = ['p', 'H', '*', '^', 'v']
 dashes = ['-', '--', ':', '-.', (0,(4,1,1,1,1,1))]
-plt_figsize = (8,5)
+plt_figsize = (9,6.5)
 
 csvfile_name = f"fisie_merged_ar_{ratio}_avg_reputation.csv"
 df = pd.read_csv(csvfile_name)

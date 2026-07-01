@@ -7,7 +7,7 @@ import numpy as np
 
 # static
 class IIMSC:
-    rep_min = 2  # R_min
+    rep_min = 1  # R_min
     rep_max = 10  # R_max
     rep_init = 7 # R_init
     rep_inc = 1  # r^+
@@ -29,9 +29,9 @@ class IoTDevices:
 
     @staticmethod
     def prob_pass_audit(fog_node):
-        Audit.audit_cycle += 1
         if random() < 0.2: # No partial verification
             return 1
+        Audit.audit_cycle += 1
         ell = IoTDevices.partial_sample_length()
         h = fog_node.honesty
         if ell > h:

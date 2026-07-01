@@ -20,7 +20,7 @@ suffix = suffix.replace('.','-')
 folder="sim"
 Audit = None
 
-fog_per = 1000
+fog_per = 500
 num_strategies = 5
 
 
